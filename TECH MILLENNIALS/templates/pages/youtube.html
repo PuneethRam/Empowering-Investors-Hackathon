@@ -1,0 +1,209 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% load i18n static admin_datta %}
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <title>YouTube Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+
+        .header {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            width: 100%;
+            padding: 0 20px; /* Optional: Add horizontal padding for better readability */
+            box-sizing: border-box; /* Include padding in the width calculation */
+        }
+        
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .result-header {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .result-texts {
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .ok {
+            background-color: #7ed321;
+            color: #fff;
+        }
+
+        .warning {
+            background-color: #ffcc00;
+            color: #fff;
+        }
+
+        .good {
+            background-color: #7ed321;
+            color: #fff;
+        }
+
+        .not-good {
+            background-color: #ff5a5f;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 class="header">YouTube Analysis</h2>
+            <form method="post" class="analysis-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name" class="label">Your Name:</label>
+                    <input type="text" name="name" id="name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="video_url" class="label">YouTube Video URL:</label>
+                    <input type="text" name="video_url" id="video_url" class="input" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+
+        <div class="result-container">
+            <h2 class="header">Analysis Result</h2>
+            {% if latest_analysis_result %}
+            <div class="result-item">
+                <h3 class="result-header">Channel Name</h3>
+                <p class="result-text">{{ latest_analysis_result.channel_name }}</p>
+            </div>
+            <div class="result-item">
+                <h3 class="result-header">Description Check</h3>
+                <p class="result-text {% if latest_analysis_result.description_score > 0.65 %}ok{% else %}not-good{% endif %}">
+                    {% if latest_analysis_result.description_score > 0.65 %}Good. No potentially misleading promotions.{% else %}Potentially Misleading{% endif %}
+                </p>
+            </div>
+
+            <div class="result-item">
+                <h3 class="result-header">Promotion in Video</h3>
+                <p class="result-text">{{ latest_analysis_result.promotion }}</p>
+                <p class=" result-text">
+                    {% if latest_analysis_result.app_result == 0 %}No Promotion{% endif %}
+                    {% if latest_analysis_result.app_result == 1 %}Safe to use. This app is registered with SEBI{% endif %}
+                    {% if latest_analysis_result.app_result == 2 %}Beware. The app is under SEBI blacklist. Don't use it.{% endif %}
+                    {% if latest_analysis_result.app_result == 3 %}Beware. The app is not registered with SEBI{% endif %}
+                </p>
+            </div>
+
+            <div class="result-item">
+                <h3 class="result-header">Sentiment of Comments</h3>
+                <p class="result-text {% if latest_analysis_result.comments_score > 5 %}good{% else %}not-good{% endif %}">
+                    {% if latest_analysis_result.comments_score > 5 %}Good{% else %}Not Good{% endif %}
+                </p>
+            </div>
+            <div class="result-item">
+                <h3 class="result-header">Video Report</h3>
+                <p class="result-text">{{ latest_analysis_result.video_report }}</p>
+            </div>
+            <div class="result-item">
+                <h3 class="result-header">Overall Content Analysis</h3>
+                <p class="result-text {% if latest_analysis_result.transcript_score > 5 %}good{% else %}warning{% endif %}">
+                    {% if latest_analysis_result.transcript_score > 5 %}Good{% else %}Neutral{% endif %}
+                </p>
+            </div>
+            <div class="result-item">
+                <h3 class="result-header">Overall Channel Analysis</h3>
+                <p class="result-text">{{ latest_analysis_result.overall_report }}</p>
+            </div>
+            <div class="result-item">
+                <h3 class="result-header">Overall Score</h3>
+                <label for="disk_c">Overall Legitimacy score:</label>
+                <meter id="disk_c" value="{{ latest_analysis_result.overall_score}}" min="0" max="10">2 out of 10</meter>
+                <p style="font-size:26px" class="result-texts">{{ latest_analysis_result.overall_score }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+
+</html>
+
+{% endblock content %}
