@@ -44,11 +44,14 @@ API : Telethon, GoogleApiClient, OpenAi
 ## Step-by-Step Code Execution Instructions:
 1. Clone the repository.
 2. Open the terminal
-3. Run the command " pip install -r requirements.txt"
-4. Run the command "python manage.py makemigrations"
-5. Run the command "python manage.py migrate"
-6. Run the command "python manage.py runserver"
-7. The server would have been started at your local host.
+3. https://drive.google.com/drive/folders/1aaTLmYCFjieWTmV1SNHUfpQJzlW52IUE?usp=sharing
+4. https://drive.google.com/drive/folders/1eQ0KsZ0hmM35rqfZrMJUHsqEvN6rE6qy?usp=sharing
+5. Download these two folders and keep it inside home directory.(Empowering-Investors-Hackathon\TECH MILLENNIALS\home\).
+6. Run the command " pip install -r requirements.txt"
+7. Run the command "python manage.py makemigrations"
+8. Run the command "python manage.py migrate"
+9. Run the command "python manage.py runserver"
+10. The server would have been started at your local host.
   
 ## What I Learned:
 Full-Stack Development: Gaining experience in both frontend and backend development, understanding their integration and communication.
